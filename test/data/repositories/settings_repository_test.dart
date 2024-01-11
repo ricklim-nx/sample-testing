@@ -16,7 +16,30 @@ void main() {
     );
   });
 
-  group('[getSettings] checks', () {
+  group('["getPublicSettings" checks]', () {
+    tearDown(() {
+      verify(() => remoteDataSource.httpGet<List<String>>('public/settings')).called(1);
+      verifyNoMoreInteractions(remoteDataSource);
+    });
+
+    test('Successful', () async {
+      when(() => remoteDataSource.httpGet<List<String>>(any())).thenAnswer(
+        (_) async => Either<Failure, List<String>>.right(<String>[]),
+      );
+      final Either<Failure, List<String>> res = await repository.getPublicSettings();
+      expect(res.isRight, true);
+    });
+
+    test('Failure', () async {
+      when(() => remoteDataSource.httpGet<List<String>>(any())).thenAnswer(
+        (_) async => Either<Failure, List<String>>.left(const Failure()),
+      );
+      final Either<Failure, List<String>> res = await repository.getPublicSettings();
+      expect(res.isLeft, true);
+    });
+  });
+
+  group('["getPrivateSettings" checks]', () {
     tearDown(() {
       verify(() => remoteDataSource.httpGet<List<String>>('settings')).called(1);
       verifyNoMoreInteractions(remoteDataSource);
@@ -26,7 +49,7 @@ void main() {
       when(() => remoteDataSource.httpGet<List<String>>(any())).thenAnswer(
         (_) async => Either<Failure, List<String>>.right(<String>[]),
       );
-      final Either<Failure, List<String>> res = await repository.getSettings();
+      final Either<Failure, List<String>> res = await repository.getPrivateSettings();
       expect(res.isRight, true);
     });
 
@@ -34,7 +57,7 @@ void main() {
       when(() => remoteDataSource.httpGet<List<String>>(any())).thenAnswer(
         (_) async => Either<Failure, List<String>>.left(const Failure()),
       );
-      final Either<Failure, List<String>> res = await repository.getSettings();
+      final Either<Failure, List<String>> res = await repository.getPrivateSettings();
       expect(res.isLeft, true);
     });
   });

@@ -8,6 +8,9 @@ class SettingsRepository {
 
   final RemoteDataSource _dataSource;
 
-  Future<Either<Failure, List<String>>> getSettings() =>
+  Future<Either<Failure, List<String>>> getPublicSettings() =>
+      _dataSource.httpGet<List<String>>('public/settings');
+
+  Future<Either<Failure, List<String>>> getPrivateSettings() =>
       _dataSource.httpGet<List<String>>('settings');
 }

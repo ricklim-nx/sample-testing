@@ -19,42 +19,63 @@ void main() {
     );
   });
 
-  group('[getSettings] checks', () {
+  group('["getSettings" checks]', () {
     tearDown(() {
       verify(() => authRepository.isAuthenticated()).called(1);
       verifyNoMoreInteractions(authRepository);
     });
 
-    test('Successful', () async {
+    test('Successful (authenticated)', () async {
       when(() => authRepository.isAuthenticated()).thenAnswer((_) async => true);
-      when(() => settingsRepository.getSettings()).thenAnswer(
+      when(() => settingsRepository.getPrivateSettings()).thenAnswer(
         (_) async => Either<Failure, List<String>>.right(<String>[]),
       );
 
       final Either<Failure, List<String>> res = await useCase.getSettings();
 
+      verify(() => settingsRepository.getPrivateSettings()).called(1);
+      verifyNoMoreInteractions(settingsRepository);
+
       expect(res.isRight, true);
     });
 
-    test('Failure (not authenticated)', () async {
-      when(() => authRepository.isAuthenticated()).thenAnswer((_) async => false);
-
-      final Either<Failure, List<String>> res = await useCase.getSettings();
-
-      verifyNoMoreInteractions(settingsRepository);
-
-      expect(res.left, const Failure('Not authenticated'));
-    });
-
-    test('Failure (request)', () async {
+    test('Failure (authenticated)', () async {
       when(() => authRepository.isAuthenticated()).thenAnswer((_) async => true);
-      when(() => settingsRepository.getSettings()).thenAnswer(
+      when(() => settingsRepository.getPrivateSettings()).thenAnswer(
         (_) async => Either<Failure, List<String>>.left(const Failure()),
       );
 
       final Either<Failure, List<String>> res = await useCase.getSettings();
 
-      verify(() => settingsRepository.getSettings()).called(1);
+      verify(() => settingsRepository.getPrivateSettings()).called(1);
+      verifyNoMoreInteractions(settingsRepository);
+
+      expect(res.isLeft, true);
+    });
+
+    test('Successful (unauthenticated)', () async {
+      when(() => authRepository.isAuthenticated()).thenAnswer((_) async => false);
+      when(() => settingsRepository.getPublicSettings()).thenAnswer(
+        (_) async => Either<Failure, List<String>>.right(<String>[]),
+      );
+
+      final Either<Failure, List<String>> res = await useCase.getSettings();
+
+      verify(() => settingsRepository.getPublicSettings()).called(1);
+      verifyNoMoreInteractions(settingsRepository);
+
+      expect(res.isRight, true);
+    });
+
+    test('Failure (unauthenticated)', () async {
+      when(() => authRepository.isAuthenticated()).thenAnswer((_) async => false);
+      when(() => settingsRepository.getPublicSettings()).thenAnswer(
+        (_) async => Either<Failure, List<String>>.left(const Failure()),
+      );
+
+      final Either<Failure, List<String>> res = await useCase.getSettings();
+
+      verify(() => settingsRepository.getPublicSettings()).called(1);
       verifyNoMoreInteractions(settingsRepository);
 
       expect(res.isLeft, true);

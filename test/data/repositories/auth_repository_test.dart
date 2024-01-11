@@ -15,7 +15,7 @@ void main() {
     );
   });
 
-  group('[isAuthenticated] checks', () {
+  group('["isAuthenticated" checks]', () {
     tearDown(() {
       verify(() => localDataSource.dbGet<bool?>('jwt')).called(1);
       verifyNoMoreInteractions(localDataSource);

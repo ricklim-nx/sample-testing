@@ -14,10 +14,8 @@ class SettingsUseCase {
   Future<Either<Failure, List<String>>> getSettings() async {
     final bool isAuthenticated = await _authRepository.isAuthenticated();
 
-    if (!isAuthenticated) {
-      return Either<Failure, List<String>>.left(const Failure('Not authenticated'));
-    }
-
-    return _settingsRepository.getSettings();
+    return isAuthenticated
+        ? _settingsRepository.getPrivateSettings()
+        : _settingsRepository.getPublicSettings();
   }
 }
